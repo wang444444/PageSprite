@@ -36,7 +36,7 @@
     "windows": {
       "nsis": {
         "installMode": "currentUser",
-        "webviewInstallMode": "downloadBootstrapper"
+        "webviewInstallMode": "offlineBootstrapper"
       }
     }
   }
