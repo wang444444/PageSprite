@@ -13,6 +13,7 @@
   --danger: #ef4444;
   --success: #22c55e;
   --warning: #f59e0b;
+  --dot-color: #2a3a5c;
 
   --toolbar-height: 40px;
   --font-mono: "SF Mono", "Fira Code", "Cascadia Code", monospace;
@@ -33,6 +34,7 @@
   --danger: #ef4444;
   --success: #22c55e;
   --warning: #f59e0b;
+  --dot-color: #d0d0d0;
 }
 
 * {

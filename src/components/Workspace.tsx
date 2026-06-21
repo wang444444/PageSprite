@@ -1774,7 +1774,7 @@ function WorkspaceContent() {
   const hasContent = !!generatedCode || annotations.length > 0;
 
   return (
-    <div style={{ position: "relative", height: "100%", background: "#ffffff" }}>
+    <div style={{ position: "relative", height: "100%", background: "var(--bg-secondary)" }}>
       {/* Floating glassmorphism toolbar */}
       <div
         data-rect-control="true"
@@ -1816,8 +1816,8 @@ function WorkspaceContent() {
           overscrollBehavior: "none",
           userSelect: "none",
           WebkitUserSelect: "none",
-          backgroundColor: "#ffffff",
-          backgroundImage: "radial-gradient(circle, #d0d0d0 1px, transparent 1px)",
+          backgroundColor: "var(--bg-secondary)",
+          backgroundImage: "radial-gradient(circle, var(--dot-color) 1px, transparent 1px)",
           backgroundSize: `${24 * zoom}px ${24 * zoom}px`,
           backgroundPosition: `${panX}px ${panY}px`,
         }}

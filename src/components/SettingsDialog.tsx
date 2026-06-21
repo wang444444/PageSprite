@@ -277,7 +277,7 @@ export default function SettingsDialog() {
               <textarea
                 value={systemPrompt}
                 onChange={(e) => setSystemPrompt(e.target.value)}
-                rows={12}
+                rows={6}
                 style={{
                   ...inputStyle,
                   resize: "vertical",
