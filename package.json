@@ -9,30 +9,27 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:1420 && electron .\"",
-    "electron:build": "npm run build && electron-builder"
+    "electron:build": "npm run build && electron-builder",
+    "postinstall": "node scripts/compile-fa.js"
   },
-  "dependencies": {
-    "@fortawesome/fontawesome-free": "^7.2.0",
-    "html-to-image": "^1.11.13",
-    "lucide-react": "^1.17.0",
-    "ogl": "^1.0.11",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-markdown": "^10.1.0",
-    "react-resizable-panels": "^2.1.0",
-    "remark-gfm": "^4.0.1",
-    "zustand": "^5.0.5"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@fortawesome/fontawesome-free": "^7.2.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
     "concurrently": "^9.2.3",
     "electron": "^33.4.11",
     "electron-builder": "^25.1.0",
+    "html-to-image": "^1.11.13",
+    "lucide-react": "^1.17.0",
+    "ogl": "^1.0.11",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
-    "wait-on": "^8.0.5"
+    "wait-on": "^8.0.5",
+    "zustand": "^5.0.5"
   },
   "build": {
     "appId": "com.pagesprite.desktop",

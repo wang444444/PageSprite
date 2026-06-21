@@ -13,6 +13,21 @@ npx tsc --noEmit         # TypeScript type check
 node --check <file.js>   # Syntax check for Electron plain JS files
 ```
 
+### Linux Requirements
+
+Electron on Linux requires these system libraries for the sandbox and display:
+
+```bash
+# Debian/Ubuntu
+sudo apt install libnss3 libatk-bridge2.0-0 libgtk-3-0 libdrm2 libgbm1 \
+                 libasound2 libxkbcommon0 libxcomposite1 libxdamage1 \
+                 libxrandr2 libxfixes3 libx11-xcb1
+
+# Runs as root (Docker/CI): --no-sandbox is auto-appended in electron/main.js
+```
+
+The GitHub Actions CI builds AppImage for Linux which bundles most deps.
+
 ## Architecture
 
 PageSprite is an **Electron** desktop app (converted from the original Tauri/Rust backend). Users draw rect annotations on an infinite canvas workspace, then prompt AI per-rect to generate HTML content rendered inside iframe overlays. Pure annotation-driven workflow — no chat panel.

@@ -8,3 +8,4 @@ src-tauri
 .env
 .env.*
 *.local
+electron/assets/fa-inline.css

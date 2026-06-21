@@ -12,6 +12,13 @@ import { getFontAwesomeCSS } from "./assets/fontawesome.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = !app.isPackaged;
 
+// Linux: disable Chromium sandbox for maximum compatibility
+// (Docker, CI, VMs, Wayland, etc.). Must be before app.whenReady().
+if (process.platform === "linux") {
+  app.commandLine.appendSwitch("no-sandbox");
+  app.commandLine.appendSwitch("disable-gpu-sandbox");
+}
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1400,
