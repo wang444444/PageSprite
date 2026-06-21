@@ -15,6 +15,7 @@ import type { Annotation, ToolType, SnapLine } from "../types";
 import { TriangleAlert, Sparkles } from "lucide-react";
 import LeftAnnotationToolbar from "./LeftAnnotationToolbar";
 import ZoomControls from "./ZoomControls";
+import { useT } from "../i18n";
 
 /**
  * Detects whether a keydown event is part of an active IME composition.
@@ -75,6 +76,7 @@ function TextInputPopup({
   onCancel: () => void;
   initialValue?: string;
 }) {
+  const t = useT();
   const [value, setValue] = useState(initialValue ?? "");
   const inputRef = useRef<HTMLInputElement>(null);
   const { onCompositionEnd, isIMEEnter } = useIMEEnter();
@@ -105,7 +107,7 @@ function TextInputPopup({
           }
         }}
         onBlur={() => onSubmit(value)}
-        placeholder="输入批注文字..."
+        placeholder={t("annotationPlaceholder")}
         style={{
           padding: "4px 8px",
           border: "2px solid var(--accent)",
@@ -136,6 +138,7 @@ function AnnotationNotePopup({
   onCancel: () => void;
   initialValue?: string;
 }) {
+  const t = useT();
   const [value, setValue] = useState(initialValue ?? "");
   const inputRef = useRef<HTMLInputElement>(null);
   const { onCompositionEnd, isIMEEnter } = useIMEEnter();
@@ -173,7 +176,7 @@ function AnnotationNotePopup({
           letterSpacing: "0.5px",
         }}
       >
-        改动意见
+        {t("changes")}
       </div>
       <input
         ref={inputRef}
@@ -187,7 +190,7 @@ function AnnotationNotePopup({
             onCancel();
           }
         }}
-        placeholder="输入对此区域的改动意见..."
+        placeholder={t("changesPlaceholder")}
         style={{
           padding: "8px 10px",
           border: "1px solid rgba(0, 0, 0, 0.15)",
@@ -213,7 +216,7 @@ function AnnotationNotePopup({
             fontSize: 12,
           }}
         >
-          取消
+          {t("cancel")}
         </button>
         <button
           onClick={() => onSubmit(value)}
@@ -229,7 +232,7 @@ function AnnotationNotePopup({
             fontWeight: 600,
           }}
         >
-          确认
+          {t("confirm")}
         </button>
       </div>
     </div>
@@ -255,6 +258,7 @@ function RegionConfig({
   onGenerate: (annotationId: string, prompt: string, contentType: string) => void;
   onCancel: (annotationId: string) => void;
 }) {
+  const t = useT();
   const [prompt, setPrompt] = useState(() => {
     const a = useChatStore.getState().annotations.find((a) => a.id === annotationId);
     // Clear prompt for canvases that already have generated content
@@ -466,7 +470,7 @@ function RegionConfig({
                 marginBottom: 6,
               }}
             >
-              提示词
+              {t("prompt")}
             </div>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 6 }}>
             <textarea
@@ -476,7 +480,7 @@ function RegionConfig({
               onCompositionEnd={onCompositionEnd}
               onKeyDown={handleKeyDown}
               onMouseUp={handleTextareaMouseUp}
-              placeholder={annotation?.generatedCode ? "请输入需要修改的内容" : "输入您想要创建的内容..."}
+              placeholder={annotation?.generatedCode ? t("promptPlaceholderRevise") : t("promptPlaceholderNew")}
               disabled={isBusy}
               rows={3}
               style={{
@@ -498,7 +502,7 @@ function RegionConfig({
               {isBusy ? (
                 <button
                   onClick={() => { cancelledRef.current = true; onCancel(annotationId); }}
-                  title="取消生成"
+                  title={t("cancelGenerate")}
                   style={{
                     width: 30,
                     height: 30,
@@ -522,7 +526,7 @@ function RegionConfig({
                 <button
                   onClick={() => canGenerate && onGenerate(annotationId, prompt, contentType)}
                   disabled={!canGenerate}
-                  title={annotation?.generatedCode && childAnnotations.length > 0 && !prompt.trim() ? "根据批注生成" : "在此区域生成"}
+                  title={annotation?.generatedCode && childAnnotations.length > 0 && !prompt.trim() ? t("generateFromAnnotations") : t("generateInRegion")}
                   style={{
                     width: 30,
                     height: 30,
@@ -1164,6 +1168,7 @@ function RectAnnotationCanvas({ annotationId, zoom, panX, panY, scrollOffset, zI
  */
 function WorkspaceContent() {
   const { generatedCode, workspaceStatus, workspaceError, setWorkspaceStatus } = useChatStore();
+  const t = useT();
   const streamContent = useChatStore((s) => s.streamingContent);
   const settings = useChatStore((s) => s.settings);
   const settingsOpen = useChatStore((s) => s.settingsOpen);
@@ -1273,12 +1278,12 @@ function WorkspaceContent() {
   const globalPhase = useMemo(() => {
     const len = streamContent?.length ?? 0;
     const c = streamContent ?? "";
-    if (len < 50) return { title: "AI 正在分析批注及页面结构...", subtitle: "正在分析..." };
-    if (!c.includes("```")) return { title: "AI 正在根据批注意见生成代码...", subtitle: "正在生成代码..." };
-    if (!c.includes("```html")) return { title: "AI 正在生成HTML代码...", subtitle: "正在生成HTML..." };
+    if (len < 50) return { title: t("analyzing"), subtitle: t("analyzingSub") };
+    if (!c.includes("```")) return { title: t("generating"), subtitle: t("generatingSub") };
+    if (!c.includes("```html")) return { title: t("generatingHtml"), subtitle: t("generatingHtmlSub") };
     if (!c.includes("```\n") || len < 1500)
-      return { title: "AI 正在优化页面样式...", subtitle: "正在优化样式..." };
-    return { title: "AI 即将完成...", subtitle: "正在收尾..." };
+      return { title: t("styling"), subtitle: t("stylingSub") };
+    return { title: t("finishing"), subtitle: t("finishingSub") };
   }, [streamContent]);
 
   const {
@@ -2264,7 +2269,7 @@ function WorkspaceContent() {
               fontSize: 14,
               lineHeight: 1,
             }}
-            title="关闭"
+            title={t("close")}
           >
             ✕
           </button>

@@ -43,6 +43,8 @@ export interface AISettings {
   agentType: AgentType;
   agentCommand?: string;
   agentArgsTemplate?: string;
+  language: Language;
+  theme: Theme;
 }
 
 export type ToolType = "cursor" | "pan" | "pen" | "rect" | "arrow" | "text" | "highlight" | "rectangle" | "ellipse";
@@ -55,3 +57,5 @@ export type SnapLine = {
 };
 
 export type AgentType = "streaming" | "opencode" | "claude" | "custom";
+export type Language = "zh" | "en";
+export type Theme = "light" | "dark";

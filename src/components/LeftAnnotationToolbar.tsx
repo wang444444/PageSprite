@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Square, Circle, Pen, ArrowUpRight, Download, Trash2, RotateCcw, FileText, ImageIcon } from "lucide-react";
 import { Z_INDEX } from "../utils/zIndex";
 import type { Annotation, ToolType } from "../types";
+import { useT } from "../i18n";
 
 const LEFT_COLORS = ["#ff0000", "#ff8800", "#ffdd00", "#00cc44", "#0088ff", "#8800ff", "#000000"];
 
@@ -57,6 +58,7 @@ export default function LeftAnnotationToolbar({
     setLeftColorOpen(false);
   }, [selectedRectId]);
 
+  const t = useT();
   if (!selectedRectId) return null;
   const selAnn = allRects.find((a) => a.id === selectedRectId);
   if (!selAnn?.boundingBox) return null;
@@ -89,19 +91,19 @@ export default function LeftAnnotationToolbar({
       }}
     >
       {/* Rectangle */}
-      <ToolButton active={currentTool === "rectangle"} onClick={() => onToolChange("rectangle")} title="矩形">
+      <ToolButton active={currentTool === "rectangle"} onClick={() => onToolChange("rectangle")} title={t("rectangle")}>
         <Square size={15} />
       </ToolButton>
       {/* Ellipse */}
-      <ToolButton active={currentTool === "ellipse"} onClick={() => onToolChange("ellipse")} title="圆形">
+      <ToolButton active={currentTool === "ellipse"} onClick={() => onToolChange("ellipse")} title={t("ellipse")}>
         <Circle size={15} />
       </ToolButton>
       {/* Pen */}
-      <ToolButton active={currentTool === "pen"} onClick={() => onToolChange("pen")} title="画笔">
+      <ToolButton active={currentTool === "pen"} onClick={() => onToolChange("pen")} title={t("pen")}>
         <Pen size={15} />
       </ToolButton>
       {/* Arrow */}
-      <ToolButton active={currentTool === "arrow"} onClick={() => onToolChange("arrow")} title="箭头">
+      <ToolButton active={currentTool === "arrow"} onClick={() => onToolChange("arrow")} title={t("arrow")}>
         <ArrowUpRight size={15} />
       </ToolButton>
 
@@ -113,7 +115,7 @@ export default function LeftAnnotationToolbar({
           data-rect-control="true"
           onClick={() => setLeftColorOpen((v) => !v)}
           onMouseDown={(e) => e.nativeEvent.stopPropagation()}
-          title="颜色"
+          title={t("color")}
           style={{
             width: 16, height: 16, minWidth: 0, padding: 0,
             marginTop: 2, marginBottom: 2,
@@ -161,7 +163,7 @@ export default function LeftAnnotationToolbar({
       <div style={{ width: "80%", height: 1, background: "#d4d4d4", margin: "3px 0" }} />
 
       {/* Reset */}
-      <ToolButton onClick={onResetRect} title="重置">
+      <ToolButton onClick={onResetRect} title={t("reset")}>
         <RotateCcw size={15} />
       </ToolButton>
 
@@ -169,7 +171,7 @@ export default function LeftAnnotationToolbar({
       <div style={{ position: "relative" }}>
         <button
           onClick={() => { if (!selAnn.generatedCode) return; setExportOpen((v) => !v); }}
-          title="导出"
+          title={t("export")}
           style={{
             width: 30, height: 30,
             display: "flex", alignItems: "center", justifyContent: "center",
@@ -205,11 +207,11 @@ export default function LeftAnnotationToolbar({
             >
               <ExportButton onClick={() => onExportRect(selAnn.id)}>
                 <FileText size={13} />
-                下载 HTML
+                {t("downloadHtml")}
               </ExportButton>
               <ExportButton onClick={() => onExportImage(selAnn.id)} borderTop>
                 <ImageIcon size={13} />
-                下载图片
+                {t("downloadImage")}
               </ExportButton>
             </div>
           </>
@@ -217,7 +219,7 @@ export default function LeftAnnotationToolbar({
       </div>
 
       {/* Delete */}
-      <ToolButton onClick={() => onDeleteRect(selectedRectId)} title="删除" color="#ef4444">
+      <ToolButton onClick={() => onDeleteRect(selectedRectId)} title={t("delete")} color="#ef4444">
         <Trash2 size={15} />
       </ToolButton>
     </div>

@@ -13,6 +13,13 @@ Draw rectangles on an infinite canvas, describe what you want in each region, an
 3. **Generate** — AI generates HTML that fills the region, rendered in an embedded iframe
 4. **Refine** — draw annotations (arrows, highlights, text notes) on top of generated content to guide revisions
 
+### Export
+
+Each generated region can be exported individually via the region toolbar:
+
+- **Download HTML** — exports the generated code as a standalone `.html` file with Font Awesome icons bundled
+- **Download Image** — renders the region to a PNG image via headless iframe capture
+
 Multiple generation backends are supported:
 
 | Backend | Description |

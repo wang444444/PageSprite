@@ -1,4 +1,5 @@
 import { Z_INDEX } from "../utils/zIndex";
+import { useT } from "../i18n";
 
 export default function ZoomControls({
   zoom,
@@ -7,6 +8,7 @@ export default function ZoomControls({
   zoom: number;
   onZoomChange: (update: (prev: number) => number) => void;
 }) {
+  const t = useT();
   return (
     <div
       style={{
@@ -28,7 +30,7 @@ export default function ZoomControls({
     >
       <button
         onClick={() => onZoomChange((z) => Math.max(0.1, +(z - 0.1).toFixed(2)))}
-        title="缩小"
+        title={t("zoomOut")}
         style={{
           width: 28, height: 28,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -49,7 +51,7 @@ export default function ZoomControls({
       </span>
       <button
         onClick={() => onZoomChange((z) => Math.min(5, +(z + 0.1).toFixed(2)))}
-        title="放大"
+        title={t("zoomIn")}
         style={{
           width: 28, height: 28,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -63,7 +65,7 @@ export default function ZoomControls({
       <div style={{ width: 1, height: 16, background: "#d4d4d4", margin: "0 4px" }} />
       <button
         onClick={() => onZoomChange(() => 1)}
-        title="重置缩放"
+        title={t("resetZoom")}
         style={{
           height: 28, padding: "0 8px",
           border: "none", borderRadius: 4,

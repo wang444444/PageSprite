@@ -8,6 +8,8 @@ interface ElectronAPI {
       agent_type?: string;
       agent_command?: string | null;
       agent_args_template?: string | null;
+      language?: string;
+      theme?: string;
     }>;
     save: (settings: Record<string, unknown>) => Promise<void>;
   };

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useChatStore } from "../stores/chatStore";
-import type { AgentType } from "../types";
+import type { AgentType, Language, Theme } from "../types";
+import { useT } from "../i18n";
 
 type Tab = "agent" | "systemPrompt";
 
 export default function SettingsDialog() {
+  const t = useT();
   const { settings, settingsOpen, setSettingsOpen, updateSettings, persistSettings } = useChatStore();
 
   // API tab
@@ -18,6 +20,10 @@ export default function SettingsDialog() {
   const [agentCommand, setAgentCommand] = useState(settings.agentCommand ?? "");
   const [agentArgsTemplate, setAgentArgsTemplate] = useState(settings.agentArgsTemplate ?? "");
 
+  // Basic settings
+  const [language, setLanguage] = useState<Language>(settings.language);
+  const [theme, setTheme] = useState<Theme>(settings.theme);
+
   const [activeTab, setActiveTab] = useState<Tab>("agent");
 
   useEffect(() => {
@@ -29,6 +35,8 @@ export default function SettingsDialog() {
       setAgentType(settings.agentType);
       setAgentCommand(settings.agentCommand ?? "");
       setAgentArgsTemplate(settings.agentArgsTemplate ?? "");
+      setLanguage(settings.language);
+      setTheme(settings.theme);
     }
   }, [settingsOpen, settings]);
 
@@ -41,6 +49,8 @@ export default function SettingsDialog() {
       agentType,
       agentCommand: agentType === "custom" ? (agentCommand || undefined) : undefined,
       agentArgsTemplate: agentType === "custom" ? (agentArgsTemplate || undefined) : undefined,
+      language,
+      theme,
     });
     persistSettings();
 
@@ -94,29 +104,29 @@ export default function SettingsDialog() {
       >
         {/* Tabs */}
         <div style={{ display: "flex", gap: 0, marginBottom: 28 }}>
-          <button style={tabStyle("agent")} onClick={() => setActiveTab("agent")}>Agent 设置</button>
-          <button style={tabStyle("systemPrompt")} onClick={() => setActiveTab("systemPrompt")}>风格偏好</button>
+          <button style={tabStyle("agent")} onClick={() => setActiveTab("agent")}>{t("tabAgent")}</button>
+          <button style={tabStyle("systemPrompt")} onClick={() => setActiveTab("systemPrompt")}>{t("tabBasic")}</button>
         </div>
 
         {activeTab === "agent" && (
           <>
             <div style={{ marginBottom: 18 }}>
-              <label style={labelStyle}>Agent 类型</label>
+              <label style={labelStyle}>{t("agentType")}</label>
               <select
                 value={agentType}
                 onChange={(e) => setAgentType(e.target.value as AgentType)}
                 style={selectStyle}
               >
-                <option value="streaming">内置Agent</option>
-                <option value="opencode">OpenCode CLI</option>
-                <option value="claude">Claude Code CLI</option>
-                <option value="custom">自定义</option>
+                <option value="streaming">{t("agentTypeStreaming")}</option>
+                <option value="opencode">{t("agentTypeOpencode")}</option>
+                <option value="claude">{t("agentTypeClaude")}</option>
+                <option value="custom">{t("agentTypeCustom")}</option>
               </select>
               <div style={{ fontSize: 11, color: "#888", marginTop: 4, lineHeight: 1.5 }}>
-                {agentType === "streaming" && "通过配置的 API 端点直接生成代码，无需额外安装。"}
-                {agentType === "opencode" && "使用 OpenCode CLI 工具生成代码。需要先在系统中安装 opencode。"}
-                {agentType === "claude" && "使用 Claude Code CLI (claude) 生成代码。需要先在系统中安装 Claude Code。"}
-                {agentType === "custom" && "使用自定义 CLI 工具生成代码。配置下面的命令和参数模板。"}
+                {agentType === "streaming" && t("agentDescStreaming")}
+                {agentType === "opencode" && t("agentDescOpencode")}
+                {agentType === "claude" && t("agentDescClaude")}
+                {agentType === "custom" && t("agentDescCustom")}
               </div>
             </div>
 
@@ -125,25 +135,25 @@ export default function SettingsDialog() {
                 {agentType === "custom" && (
                   <>
                     <div style={{ marginBottom: 18 }}>
-                      <label style={labelStyle}>命令</label>
+                      <label style={labelStyle}>{t("command")}</label>
                       <input
                         value={agentCommand}
                         onChange={(e) => setAgentCommand(e.target.value)}
-                        placeholder="如: opencode, claude, my-tool"
+                        placeholder={t("commandPlaceholder")}
                         style={inputStyle}
                       />
                     </div>
 
                     <div style={{ marginBottom: 18 }}>
-                      <label style={labelStyle}>参数模板</label>
+                      <label style={labelStyle}>{t("argsTemplate")}</label>
                       <input
                         value={agentArgsTemplate}
                         onChange={(e) => setAgentArgsTemplate(e.target.value)}
-                        placeholder={'如: run --dir {dir} --format json'}
+                        placeholder={t("argsTemplatePlaceholder")}
                         style={inputStyle}
                       />
                       <div style={{ fontSize: 11, color: "#888", marginTop: 4 }}>
-                        可用占位符: {`{dir}`} 工作目录（提示词会自动作为最后一个参数追加）
+                        {t("argsTemplateHint")}
                       </div>
                     </div>
 
@@ -193,32 +203,32 @@ export default function SettingsDialog() {
                 }} />
 
                 <div style={{ marginBottom: 18 }}>
-                  <label style={labelStyle}>API 端点</label>
+                  <label style={labelStyle}>{t("apiEndpoint")}</label>
                   <input
                     value={endpoint}
                     onChange={(e) => setEndpoint(e.target.value)}
-                    placeholder="https://api.openai.com/v1"
+                    placeholder={t("apiEndpointPlaceholder")}
                     style={inputStyle}
                   />
                 </div>
 
                 <div style={{ marginBottom: 18 }}>
-                  <label style={labelStyle}>API Key</label>
+                  <label style={labelStyle}>{t("apiKey")}</label>
                   <input
                     type="password"
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="sk-..."
+                    placeholder={t("apiKeyPlaceholder")}
                     style={inputStyle}
                   />
                 </div>
 
                 <div style={{ marginBottom: 28 }}>
-                  <label style={labelStyle}>模型</label>
+                  <label style={labelStyle}>{t("model")}</label>
                   <input
                     value={model}
                     onChange={(e) => setModel(e.target.value)}
-                    placeholder="gpt-4o"
+                    placeholder={t("modelPlaceholder")}
                     style={inputStyle}
                   />
                 </div>
@@ -228,24 +238,56 @@ export default function SettingsDialog() {
         )}
 
         {activeTab === "systemPrompt" && (
-          <div style={{ marginBottom: 28 }}>
-            <label style={labelStyle}>风格偏好</label>
-            <div style={{ fontSize: 11, color: "#888", marginTop: -2, marginBottom: 8, lineHeight: 1.5 }}>
-              控制 AI 输出的视觉风格，会追加到固定的系统提示词之后。留空则使用默认风格。
+          <>
+            <div style={{ marginBottom: 18 }}>
+              <label style={labelStyle}>{t("language")}</label>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+                style={selectStyle}
+              >
+                <option value="zh">{t("langZh")}</option>
+                <option value="en">{t("langEn")}</option>
+              </select>
             </div>
-            <textarea
-              value={systemPrompt}
-              onChange={(e) => setSystemPrompt(e.target.value)}
-              rows={16}
-              style={{
-                ...inputStyle,
-                resize: "vertical",
-                fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
-                fontSize: 12,
-                lineHeight: 1.6,
-              }}
-            />
-          </div>
+
+            <div style={{ marginBottom: 18 }}>
+              <label style={labelStyle}>{t("theme")}</label>
+              <select
+                value={theme}
+                onChange={(e) => setTheme(e.target.value as Theme)}
+                style={selectStyle}
+              >
+                <option value="light">{t("themeLight")}</option>
+                <option value="dark">{t("themeDark")}</option>
+              </select>
+            </div>
+
+            <div style={{
+              height: 1,
+              background: "rgba(0,0,0,0.06)",
+              margin: "24px 0",
+            }} />
+
+            <div style={{ marginBottom: 28 }}>
+              <label style={labelStyle}>{t("stylePrompt")}</label>
+              <div style={{ fontSize: 11, color: "#888", marginTop: -2, marginBottom: 8, lineHeight: 1.5 }}>
+                {t("stylePromptDesc")}
+              </div>
+              <textarea
+                value={systemPrompt}
+                onChange={(e) => setSystemPrompt(e.target.value)}
+                rows={12}
+                style={{
+                  ...inputStyle,
+                  resize: "vertical",
+                  fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
+                  fontSize: 12,
+                  lineHeight: 1.6,
+                }}
+              />
+            </div>
+          </>
         )}
 
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
@@ -255,7 +297,7 @@ export default function SettingsDialog() {
             onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.08)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.04)"; }}
           >
-            取消
+            {t("cancel")}
           </button>
           <button
             onClick={handleSave}
@@ -269,7 +311,7 @@ export default function SettingsDialog() {
               e.currentTarget.style.transform = "none";
             }}
           >
-            保存
+            {t("save")}
           </button>
         </div>
       </div>

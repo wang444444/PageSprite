@@ -53,6 +53,8 @@ const defaultSettings: AISettings = {
   model: "gpt-4o",
   systemPrompt: DEFAULT_SYSTEM_PROMPT,
   agentType: "streaming",
+  language: "zh",
+  theme: "light",
 };
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -241,6 +243,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
         agent_type: settings.agentType,
         agent_command: settings.agentCommand ?? null,
         agent_args_template: settings.agentArgsTemplate ?? null,
+        language: settings.language,
+        theme: settings.theme,
       });
     } catch (e) {
       console.error("Failed to persist settings:", e);

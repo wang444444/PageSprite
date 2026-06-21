@@ -1,4 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { tStatic } from "../i18n";
+import { useChatStore } from "../stores/chatStore";
 
 interface Props {
   children: ReactNode;
@@ -25,6 +27,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      const lang = useChatStore.getState().settings.language;
       return (
         <div
           style={{
@@ -38,7 +41,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             gap: 12,
           }}
         >
-          <div style={{ fontSize: 14, color: "#ef4444" }}>渲染错误</div>
+          <div style={{ fontSize: 14, color: "#ef4444" }}>{tStatic(lang, "renderError")}</div>
           <div style={{ fontSize: 12, color: "#999", maxWidth: 400, textAlign: "center" }}>
             {this.state.error?.message}
           </div>
@@ -55,7 +58,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               fontSize: 12,
             }}
           >
-            重试
+            {tStatic(lang, "retry")}
           </button>
         </div>
       );

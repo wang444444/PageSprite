@@ -51,6 +51,8 @@ export function registerSettingsHandlers() {
     } else {
       delete existing.agent_args_template;
     }
+    if (settings.language) existing.language = settings.language;
+    if (settings.theme) existing.theme = settings.theme;
     fs.writeFileSync(SETTINGS_PATH, JSON.stringify(existing, null, 2));
   });
 }

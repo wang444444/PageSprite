@@ -1,5 +1,6 @@
 import type { ToolType } from "../types";
 import { MousePointer2, Hand, SquarePlus, Undo2, Redo2, Trash2, Settings, TriangleAlert } from "lucide-react";
+import { useT } from "../i18n";
 
 interface Props {
   currentTool: ToolType;
@@ -28,6 +29,7 @@ export default function Toolbar({
   hasContent,
   floating,
 }: Props) {
+  const t = useT();
   return (
     <div
       style={{
@@ -44,7 +46,7 @@ export default function Toolbar({
       {/* Cursor */}
       <button
         onClick={() => onToolChange("cursor")}
-        title="光标"
+        title={t("cursor")}
         style={{
           width: 30, height: 30,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -58,7 +60,7 @@ export default function Toolbar({
       {/* Pan */}
       <button
         onClick={() => onToolChange("pan")}
-        title="拖动"
+        title={t("pan")}
         style={{
           width: 30, height: 30,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -73,7 +75,7 @@ export default function Toolbar({
       {/* Rect */}
       <button
         onClick={() => onToolChange("rect")}
-        title="画布创建"
+        title={t("createRect")}
         style={{
           width: 30, height: 30,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -90,7 +92,7 @@ export default function Toolbar({
       <button
         onClick={onUndo}
         disabled={!hasUndo}
-        title="撤销"
+        title={t("undo")}
         style={{
           width: 30,
           height: 30,
@@ -110,7 +112,7 @@ export default function Toolbar({
       <button
         onClick={onRedo}
         disabled={!hasRedo}
-        title="恢复"
+        title={t("redo")}
         style={{
           width: 30,
           height: 30,
@@ -130,7 +132,7 @@ export default function Toolbar({
       <button
         onClick={onReset}
         disabled={!hasContent}
-        title="清空工作区"
+        title={t("clearWorkspace")}
         style={{
           width: 30,
           height: 30,
@@ -150,7 +152,7 @@ export default function Toolbar({
       <div style={{ width: 1, height: 16, background: "#d4d4d4", margin: "0 4px" }} />
       <button
         onClick={onSettingsOpen}
-        title="API 设置"
+        title={t("apiSettings")}
         style={{
           width: 30,
           height: 30,
