@@ -58,6 +58,6 @@ jobs:
           tag_name: ${{ github.ref_name }}
           files: ./dist/**/*
           generate_release_notes: true
-          overwrite: true
+          overwrite_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
