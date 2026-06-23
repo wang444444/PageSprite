@@ -1,7 +1,9 @@
 name: Build
+# 并发：同分支/同tag新任务取消旧任务，避免并行发布冲突
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -20,8 +22,14 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
+            arch: x64
+            platform: linux
           - os: windows-2022
+            arch: x64
+            platform: win
           - os: macos-14
+            arch: arm64
+            platform: mac
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
 
@@ -34,89 +42,110 @@ jobs:
           node-version: 22
           cache: npm
 
+      # 缓存 electron builder 二进制，大幅提速
+      - name: Cache electron-builder
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/electron
+          key: ${{ matrix.platform }}-electron-cache
+
       - run: npm ci
 
       - name: Build electron app
         run: npm run electron:build -- --publish=never
 
-      # 按系统打包成单一压缩包
-      - name: Package release to single zip
+      # 统一友好压缩包名，无嵌套release目录
+      - name: Package release zip (Linux/macOS)
+        if: matrix.os != 'windows-2022'
         shell: bash
         run: |
-          ZIP_NAME=release-${{ matrix.os }}.zip
-          zip -r "$ZIP_NAME" release/
-          echo "Created archive: $ZIP_NAME"
+          ZIP_NAME=pagesprite-${{ matrix.platform }}-${{ matrix.arch }}.zip
+          cd release
+          zip -r ../$ZIP_NAME .
+          cd ..
+          echo "Archive: $ZIP_NAME"
 
-      # 仅上传压缩包
-      - name: Upload single zip artifact
+      - name: Package release zip (Windows)
+        if: matrix.os == 'windows-2022'
+        shell: pwsh
+        run: |
+          $ZIP_NAME = "pagesprite-${{ matrix.platform }}-${{ matrix.arch }}.zip"
+          Compress-Archive -Path release\* -DestinationPath $ZIP_NAME
+          echo "Archive: $ZIP_NAME"
+
+      # 上传制品：zip直接放在artifact根目录，避免多层嵌套
+      - name: Upload build zip artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pagesprite-${{ matrix.os }}
-          path: release-${{ matrix.os }}.zip
-          retention-days: 7
+          name: ${{ matrix.platform }}-${{ matrix.arch }}
+          path: pagesprite-${{ matrix.platform }}-${{ matrix.arch }}.zip
+          retention-days: 14
 
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build
     runs-on: ubuntu-22.04
+    env:
+      GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+      TAG_NAME: ${{ github.ref_name }}
+      REPO: ${{ github.repository }}
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Download all zip artifacts
+      # 下载所有zip，文件直接平铺在 ./dist 下（关键修复多层目录问题）
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./dist
+          merge-multiple: true
 
-      - name: Cool down before release operation
-        run: sleep 15
-
-      - name: Purge old release & tag
-        env:
-          GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
-          TAG: ${{ github.ref_name }}
+      # 清理已有同名Release与tag（精简逻辑，删除重复git tag推送）
+      - name: Purge old release
         run: |
           set +e
-          gh release view "$TAG" >/dev/null 2>&1 && gh release delete "$TAG" --cleanup-tag -y
-          git tag -d "$TAG" 2>/dev/null
-          git push origin --delete "$TAG" 2>/dev/null
+          gh release view $TAG_NAME --repo $REPO >/dev/null 2>&1
+          if [ $? -eq 0 ]; then
+            gh release delete $TAG_NAME --cleanup-tag -y --repo $REPO
+          fi
           set -e
-          sleep 10
 
-      - name: Create empty release draft
-        env:
-          GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
-          TAG: ${{ github.ref_name }}
+      # 创建draft release
+      - name: Create Release
         run: |
-          gh release create "$TAG" \
+          gh release create $TAG_NAME \
             --generate-notes \
-            --title "Release $TAG"
+            --title "Release $TAG_NAME" \
+            --repo $REPO
 
-      - name: Upload zip assets one by one
-        env:
-          GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
-          TAG: ${{ github.ref_name }}
+      # 循环上传所有zip，带重试、限流等待，单文件失败不阻断整体发布
+      - name: Upload release assets
         run: |
           MAX_RETRY=3
-          DELAY_PER_FILE=3
-          find ./dist -maxdepth 1 -name "release-*.zip" -type f | while read -r file; do
-            echo "==== Start upload $file ===="
+          DELAY_AFTER_UPLOAD=2
+          UPLOAD_FAILED=0
+          find ./dist -maxdepth 1 -name "pagesprite-*.zip" -type f | while read -r file; do
+            echo "=== Uploading $file ==="
             attempt=1
-            success=0
+            ok=0
             while [ $attempt -le $MAX_RETRY ]; do
-              if gh release upload "$TAG" "$file" --clobber; then
-                success=1
+              if gh release upload $TAG_NAME "$file" --clobber --repo $REPO; then
+                ok=1
                 break
               fi
-              echo "Hit rate limit, wait 30s to retry ($attempt/$MAX_RETRY)"
+              echo "Upload failed, retry $attempt/$MAX_RETRY after 30s"
               sleep 30
-              attempt=$((attempt + 1))
+              attempt=$((attempt+1))
             done
-            if [ $success -ne 1 ]; then
-              echo "ERROR: Upload $file failed after multiple retries"
-              exit 1
+            if [ $ok -ne 1 ]; then
+              echo "ERROR: $file upload all retries failed"
+              UPLOAD_FAILED=1
             fi
-            echo "Upload $file success, sleep ${DELAY_PER_FILE}s..."
-            sleep $DELAY_PER_FILE
+            sleep $DELAY_AFTER_UPLOAD
           done
+          if [ $UPLOAD_FAILED -eq 1 ]; then
+            echo "Some assets upload failed, check logs"
+            exit 1
+          fi
